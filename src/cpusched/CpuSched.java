@@ -5,7 +5,7 @@ import java.util.*;
 public class CpuSched {
 
     public static CpuSched cpu = new CpuSched();
-    public int n; //number of processes
+    public int numberOfProcesses; //number of processes
     public static List<Process> processes = new ArrayList<Process>();
     public static List<Process> processesPriority = new ArrayList<Process>();
     public static ArrayList<Integer> arrivalTime = new ArrayList<>(); // store arrival time input
@@ -34,22 +34,22 @@ public class CpuSched {
         
         while (valueChecker == false) {
             System.out.print("Input no. of processes [2-9]:");
-            n = Integer.parseInt(scanner.nextLine());
-            if ((n > 1) && (n < 10)) {
+            numberOfProcesses = Integer.parseInt(scanner.nextLine());
+            if ((numberOfProcesses > 1) && (numberOfProcesses < 10)) {
                 break;
             }
             System.out.println("Invalid input, try again");
         }
 
         System.out.println("Input individual arrival time");
-        for (int i = 0; i < n; i++) {
+        for (int i = 0; i < numberOfProcesses; i++) {
             System.out.println("AT" + (i + 1) + ": ");
             input = scanner.nextInt();
             arrivalTime.add(input);
         }
 
         System.out.println("Input individual burst time");
-        for (int i = 0; i < n; i++) {
+        for (int i = 0; i < numberOfProcesses; i++) {
             System.out.println("BT" + (i + 1) + ": ");
             input = scanner.nextInt();
             burstTime.add(input);
@@ -85,7 +85,7 @@ public class CpuSched {
                 case "C":
                     System.out.println("Input individual priority");
 
-                    for (int i = 0; i < n; i++) {
+                    for (int i = 0; i < numberOfProcesses; i++) {
                         System.out.println("P" + (i + 1) + ": ");
                         input = scanner.nextInt();
                         priority.add(input);
@@ -135,7 +135,7 @@ public class CpuSched {
     private void FCFS() {
         
         // Populate process list
-        for (int i = 0; i < n; i++) {
+        for (int i = 0; i < numberOfProcesses; i++) {
             processes.add(new Process((i + 1), arrivalTime.get(i), burstTime.get(i)));
         }
 
@@ -148,7 +148,7 @@ public class CpuSched {
         int currentTime = 1;
         float totalWaitingTime = 0;
         float totalTurnaroundTime = 0;
-        for (int i = 0; i < n; i++) {
+        for (int i = 0; i < numberOfProcesses; i++) {
             Process currentProcess = processes.get(i);
             currentProcess.completionTime = currentTime + currentProcess.burstTime;
             currentProcess.turnaroundTime = currentProcess.completionTime - currentProcess.arrivalTime;
@@ -159,11 +159,11 @@ public class CpuSched {
         }
 
         // Print results
-        for (int i = 0; i < n; i++) {
+        for (int i = 0; i < numberOfProcesses; i++) {
             System.out.println(processes.get(i));
         }
-        System.out.println("Average Waiting Time is: " + (totalWaitingTime / n));
-        System.out.println("Average Turnaround Time is: " + (totalTurnaroundTime / n));
+        System.out.println("Average Waiting Time is: " + (totalWaitingTime / numberOfProcesses));
+        System.out.println("Average Turnaround Time is: " + (totalTurnaroundTime / numberOfProcesses));
         
     }
     
@@ -171,7 +171,7 @@ public class CpuSched {
     private void STRF() { 
         
         //populate process list
-        for (int i = 0; i < n; i++) {
+        for (int i = 0; i < numberOfProcesses; i++) {
             processes.add(new Process((i + 1), arrivalTime.get(i), burstTime.get(i)));
         }
 
@@ -180,12 +180,12 @@ public class CpuSched {
         float totalTurnaroundTime = 0;
         float totalWaitingTime = 0;
         
-        while (completedProcesses < n) {
+        while (completedProcesses < numberOfProcesses) {
             Process currentProcess = null;
             int shortestTimeLeft = Integer.MAX_VALUE; //default shortest time is max int value
             
             //pick process in ready state and with shortest time left
-            for (int i = 0; i < n; i++) { 
+            for (int i = 0; i < numberOfProcesses; i++) {
                 Process p = processes.get(i);
                 if (p.arrivalTime <= currentTime && p.timeLeft < shortestTimeLeft && p.timeLeft > 0) {
                     shortestTimeLeft = p.timeLeft;
@@ -210,11 +210,11 @@ public class CpuSched {
         }
 
         //print results
-        for (int i = 0; i < n; i++) {
+        for (int i = 0; i < numberOfProcesses; i++) {
             System.out.println(processes.get(i));
         }
-        System.out.println("Average Waiting Time is: " + (totalWaitingTime / n));
-        System.out.println("Average Turnaround Time is: " + (totalTurnaroundTime / n));
+        System.out.println("Average Waiting Time is: " + (totalWaitingTime / numberOfProcesses));
+        System.out.println("Average Turnaround Time is: " + (totalTurnaroundTime / numberOfProcesses));
 
     }
      
@@ -225,83 +225,84 @@ public class CpuSched {
 
     //PreEmptive Priotity Algorithm
     private void preEmptivePriority() {
-    // Create a copy of burstTime and priority lists
-    List<Integer> remainingBurstTime = new ArrayList<>(burstTime);
-    List<Integer> remainingPriority = new ArrayList<>(priority);
+        // Create a copy of burstTime and priority lists
+        List<Integer> remainingBurstTime = new ArrayList<>(burstTime);
+        List<Integer> remainingPriority = new ArrayList<>(priority);
 
-    int currentTime = 0;
-    int completedProcesses = 0;
-    float totalWaitingTime = 0;
-    float totalTurnaroundTime = 0;
-    
-    
-    
-    
-    int totalBurstTime=0;
-    
-    
-    //Populate process list
-    for (int i = 0; i < n; i++) {
-        processes.add(new Process((i + 1), arrivalTime.get(i), burstTime.get(i), priority.get(i)));
-        processesPriority.add(new Process((i + 1), arrivalTime.get(i), burstTime.get(i), priority.get(i)));
-        totalBurstTime += processes.get(i).burstTime;
-    }
-        
-    ArrayList<Integer> burstList = new ArrayList<>();
-    for (int i = 0; i < n; i++) {
-        int burstValue = processesPriority.get(i).burstTime;
-        burstList.add(burstValue);
-    }
+        int currentTime = 0;
+        int completedProcesses = 0;
+        float totalWaitingTime = 0;
+        float totalTurnaroundTime = 0;
 
-        
-        
-    
 
-    while (completedProcesses < n) {
-        int highestPriorityProcessIndex = -1;
-        int highestPriority = Integer.MAX_VALUE;
-        
-        // Find the process with the highest priority that has arrived
-        for (int i = 0; i < n; i++) {
-            if (arrivalTime.get(i) <= currentTime && remainingPriority.get(i) < highestPriority && remainingBurstTime.get(i) > 0) {
-                highestPriorityProcessIndex = i;
-                highestPriority = remainingPriority.get(i);
+
+
+        int totalBurstTime=0;
+
+
+        //Populate process list
+        for (int i = 0; i < numberOfProcesses; i++) {
+            processes.add(new Process((i + 1), arrivalTime.get(i), burstTime.get(i), priority.get(i)));
+            processesPriority.add(new Process((i + 1), arrivalTime.get(i), burstTime.get(i), priority.get(i)));
+            totalBurstTime += processes.get(i).burstTime;
+        }
+
+        ArrayList<Integer> burstList = new ArrayList<>();
+        for (int i = 0; i < numberOfProcesses; i++) {
+            int burstValue = processesPriority.get(i).burstTime;
+            burstList.add(burstValue);
+        }
+
+
+
+
+
+        while (completedProcesses < numberOfProcesses) {
+            int highestPriorityProcessIndex = -1;
+            int highestPriority = Integer.MAX_VALUE;
+
+            // Find the process with the highest priority that has arrived
+            for (int i = 0; i < numberOfProcesses; i++) {
+                if (arrivalTime.get(i) <= currentTime && remainingPriority.get(i) < highestPriority && remainingBurstTime.get(i) > 0) {
+                    highestPriorityProcessIndex = i;
+                    highestPriority = remainingPriority.get(i);
+                }
             }
-        }
 
-        if (highestPriorityProcessIndex == -1) {
+            if (highestPriorityProcessIndex == -1) {
+                currentTime++;
+                continue;
+            }
+
+            // Reduce the remaining burst time of the selected process
+            remainingBurstTime.set(highestPriorityProcessIndex, remainingBurstTime.get(highestPriorityProcessIndex) - 1);
+            System.out.println("Remaining: " + remainingBurstTime.get(highestPriorityProcessIndex));
+
+            if (remainingBurstTime.get(highestPriorityProcessIndex) == 0) {
+                completedProcesses++;
+                int processCompletionTime = currentTime + 1;
+                int processWaitingTime = processCompletionTime - arrivalTime.get(highestPriorityProcessIndex) - burstTime.get(highestPriorityProcessIndex);
+                int processTurnaroundTime = processCompletionTime - arrivalTime.get(highestPriorityProcessIndex);
+
+                totalWaitingTime += processWaitingTime;
+                totalTurnaroundTime += processTurnaroundTime;
+
+                // Print results for the completed process
+                System.out.println("Process " + (highestPriorityProcessIndex + 1) + " - Completion Time: " + processCompletionTime
+                        + " Waiting Time: " + processWaitingTime + " Turnaround Time: " + processTurnaroundTime);
+            }
             currentTime++;
-            continue;
-        }
-
-        // Reduce the remaining burst time of the selected process
-        remainingBurstTime.set(highestPriorityProcessIndex, remainingBurstTime.get(highestPriorityProcessIndex) - 1);
-        System.out.println("Remaining: " + remainingBurstTime.get(highestPriorityProcessIndex));
-
-        if (remainingBurstTime.get(highestPriorityProcessIndex) == 0) {
-            completedProcesses++;
-            int processCompletionTime = currentTime + 1;
-            int processWaitingTime = processCompletionTime - arrivalTime.get(highestPriorityProcessIndex) - burstTime.get(highestPriorityProcessIndex);
-            int processTurnaroundTime = processCompletionTime - arrivalTime.get(highestPriorityProcessIndex);
-
-            totalWaitingTime += processWaitingTime;
-            totalTurnaroundTime += processTurnaroundTime;
-
-            // Print results for the completed process
-            System.out.println("Process " + (highestPriorityProcessIndex + 1) + " - Completion Time: " + processCompletionTime
-                    + " Waiting Time: " + processWaitingTime + " Turnaround Time: " + processTurnaroundTime);
-        }
-        currentTime++;
     }
 
     // Print average waiting time and average turnaround time
-    System.out.println("Average Waiting Time: " + (totalWaitingTime / n));
-    System.out.println("Average Turnaround Time: " + (totalTurnaroundTime / n));
+    System.out.println("Average Waiting Time: " + (totalWaitingTime / numberOfProcesses));
+    System.out.println("Average Turnaround Time: " + (totalTurnaroundTime / numberOfProcesses));
 }
 
     //Round-Robin Algorithm
     private void roundRobin() {
-        //populate process list
+        List<Process> readyQueue = new ArrayList<>();
+
         
     }
     
