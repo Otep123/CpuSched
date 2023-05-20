@@ -34,6 +34,7 @@ class Process {
     public String toString() {
         return "Process{" + "pid=" + pid
                 + ", Arrival Time=" + arrivalTime
+                + ", Priority=" + priority 
                 + ", Burst Time=" + burstTime
                 + ", Waiting Time=" + waitingTime
                 + ", Turnaround Time=" + turnaroundTime + '}';
