@@ -308,6 +308,7 @@ public class CpuSched {
         for (int i = 0; i < numberOfProcesses; i++) {
             processes.add(new Process((i + 1), arrivalTime.get(i), burstTime.get(i)));
         }
+        // Used in calculating the Average Waiting time & Turnaround Time
         int currentTime = processes.get(0).arrivalTime;
         float totalTurnaroundTime = 0;
         float totalWaitingTime = 0;
@@ -324,6 +325,7 @@ public class CpuSched {
             burstTimeMap.put(p.pid, p.burstTime);
         }
 
+        // Adds the first unused process to the ready queue
         readyQueue.add(unfinishedProcesses.get(0));
 
         while (unfinishedProcesses.size() > 0) {
@@ -333,8 +335,10 @@ public class CpuSched {
                 currentTime = readyQueue.peek().arrivalTime;
             }
 
+            // Takes the head of the readyQueue as the currentProcess. The head is removed from the queue
             Process currentProcess = readyQueue.poll();
 
+            //Checks if the burstTime of the current process is within a timeQuantum step
             if (burstTimeMap.get(currentProcess.pid) <= timeQuantum) {
                 int remainingT = burstTimeMap.get(currentProcess.pid);
                 burstTimeMap.put(currentProcess.pid, 0);
