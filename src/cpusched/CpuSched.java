@@ -117,7 +117,10 @@ public class CpuSched {
                     chosenProperly1=true;
                     break;
                 case "D":
-                    cpu.roundRobin();
+                    System.out.println("Input Time Quantum: ");
+                    int timeQuantum = Integer.parseInt(scanner.nextLine());
+
+                    cpu.roundRobin(timeQuantum);
                     chosenProperly1=true;
                     break;
                 case "E":
@@ -300,10 +303,85 @@ public class CpuSched {
 }
 
     //Round-Robin Algorithm
-    private void roundRobin() {
-        List<Process> readyQueue = new ArrayList<>();
+    private void roundRobin(int timeQuantum) {
+        // Populate process list
+        for (int i = 0; i < numberOfProcesses; i++) {
+            processes.add(new Process((i + 1), arrivalTime.get(i), burstTime.get(i)));
+        }
+        int currentTime = processes.get(0).arrivalTime;
+        float totalTurnaroundTime = 0;
+        float totalWaitingTime = 0;
 
-        
+        // Uses a Map to keep track of each process' burstTimes; more efficient and readable than Lists
+        Map<Integer, Integer> burstTimeMap = new HashMap<>();
+        // Uses Queues in managing the processes, given how sequential each element is taken from the List
+        Queue<Process> completedProcesses = new LinkedList<>();
+        Queue<Process> readyQueue = new LinkedList<>();
+        List<Process> unfinishedProcesses = new ArrayList<>(processes);
+
+        // Populates the burstTimeMap with every process, and their burstTime
+        for (Process p : processes) {
+            burstTimeMap.put(p.pid, p.burstTime);
+        }
+
+        readyQueue.add(unfinishedProcesses.get(0));
+
+        while (unfinishedProcesses.size() > 0) {
+            if (readyQueue.isEmpty()) {
+                readyQueue.offer(unfinishedProcesses.get(0));
+                assert readyQueue.peek() != null;
+                currentTime = readyQueue.peek().arrivalTime;
+            }
+
+            Process currentProcess = readyQueue.poll();
+
+            if (burstTimeMap.get(currentProcess.pid) <= timeQuantum) {
+                int remainingT = burstTimeMap.get(currentProcess.pid);
+                burstTimeMap.put(currentProcess.pid, 0);
+                currentTime += remainingT;
+            } else {
+                burstTimeMap.put(currentProcess.pid, burstTimeMap.get(currentProcess.pid) - timeQuantum);
+                currentTime += timeQuantum;
+            }
+
+            List<Process> currentProcessCycle = new ArrayList<>();
+            for (Process p : processes) {
+                if (p.arrivalTime <= currentTime && p != currentProcess &&
+                        !readyQueue.contains(p) && unfinishedProcesses.contains(p)) {
+                    currentProcessCycle.add(p);
+                }
+            }
+
+            readyQueue.addAll(currentProcessCycle);
+            readyQueue.offer(readyQueue.poll());
+
+            if (burstTimeMap.get(currentProcess.pid) == 0) {
+                unfinishedProcesses.remove(currentProcess);
+                readyQueue.remove(currentProcess);
+
+                int turnAroundTime = currentTime - currentProcess.arrivalTime;
+                int waitingTime = currentTime - currentProcess.arrivalTime - currentProcess.burstTime;
+
+                currentProcess.turnaroundTime = turnAroundTime;
+                currentProcess.waitingTime = waitingTime;
+                completedProcesses.offer(currentProcess);
+            }
+        }
+
+        for (int i = 0; i < numberOfProcesses; i++) {
+            Process p = completedProcesses.poll();
+            assert p != null;
+            totalTurnaroundTime += p.turnaroundTime;
+            totalWaitingTime += p.waitingTime;
+        }
+
+        //print results
+        for (int i = 0; i < numberOfProcesses; i++) {
+            System.out.println(processes.get(i));
+        }
+        System.out.println("Average Waiting Time is: " + (totalWaitingTime / numberOfProcesses));
+        System.out.println("Average Turnaround Time is: " + (totalTurnaroundTime / numberOfProcesses));
+
     }
     
 }
