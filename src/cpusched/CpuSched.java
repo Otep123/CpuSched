@@ -317,7 +317,7 @@ public class CpuSched {
         Map<Integer, Integer> burstTimeMap = new HashMap<>();
         // Uses Queues in managing the processes, given how sequential each element is taken from the List
         Queue<Process> completedProcesses = new LinkedList<>();
-        Queue<Process> readyQueue = new LinkedList<>();
+        Queue<Process> readyQueue = new LinkedList<>(); //The readyQueue will serve as a list of processes ready to be processed by the algorithm
         List<Process> unfinishedProcesses = new ArrayList<>(processes);
 
         // Populates the burstTimeMap with every process, and their burstTime
@@ -336,9 +336,9 @@ public class CpuSched {
             }
 
             // Takes the head of the readyQueue as the currentProcess. The head is removed from the queue
-            Process currentProcess = readyQueue.poll();
+            Process currentProcess = readyQueue.peek();
 
-            //Checks if the burstTime of the current process is within a timeQuantum step
+            // Checks if the burstTime of the current process is within a timeQuantum step
             if (burstTimeMap.get(currentProcess.pid) <= timeQuantum) {
                 int remainingT = burstTimeMap.get(currentProcess.pid);
                 burstTimeMap.put(currentProcess.pid, 0);
@@ -348,6 +348,8 @@ public class CpuSched {
                 currentTime += timeQuantum;
             }
 
+            // Adds processes to currentProcessCycle, assuming that their arrival time is within the current time elapsed in the algorithm,
+            // the process isn't the current process running, isn't in the readyQueue already, and is considered unfinished
             List<Process> currentProcessCycle = new ArrayList<>();
             for (Process p : processes) {
                 if (p.arrivalTime <= currentTime && p != currentProcess &&
